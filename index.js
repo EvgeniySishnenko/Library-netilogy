@@ -1,6 +1,8 @@
 const express = require("express");
 const { v4: uuid } = require("uuid");
 
+const { start } = require("./config/");
+
 class Books {
   constructor(
     title = "",
@@ -107,8 +109,7 @@ app.delete("/api/books/:id", (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-
+const PORT = start.PORT;
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
 });
