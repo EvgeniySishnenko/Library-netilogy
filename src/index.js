@@ -14,6 +14,7 @@ const app = express();
 app.use(fileMulter.single("fileBook"));
 
 app.set("view engine", "ejs");
+app.set('views', path.join(__dirname, "views/"));
 
 app.use("/public/img", express.static(path.join(__dirname, "public/img")));
 
