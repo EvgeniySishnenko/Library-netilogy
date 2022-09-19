@@ -1,8 +1,27 @@
 const express = require("express");
-
+const http = require("http");
 const { store, Books } = require("../store");
 
 const router = express.Router();
+
+const url = `http://localhost:8080/`;
+
+const options = {
+  host: "http://localhost:8080/",
+  path: "/",
+  port: "8080",
+  method: "GET",
+};
+const callback = function (response) {
+  const str = "";
+  response.on("data", function (chunk) {
+    str += chunk;
+  });
+
+  response.on("end", function () {
+    return str;
+  });
+};
 
 router.get("/create", (req, res) => {
   res.render("books/create", {
@@ -16,9 +35,20 @@ router.get("/:id", (req, res) => {
   const { id } = req.params;
   const index = books.findIndex((book) => book.id === id);
   if (index !== -1) {
+    options.path = `/counter/${id}/incr`;
+    const reqCounterGet = http.request(options, callback);
+
+    options.path = `/counter/${id}`;
+    options.method = "POST";
+    const reqCounterPost = http.request(options, callback);
+
+    console.log(reqCounterGet);
+    console.log(reqCounterPost);
+
     res.render("books/view", {
       title: "Просмотр книги",
       book: books[index],
+      // numberViews: reqCounterGet,
     });
   } else {
     res.redirect("/404");
@@ -61,15 +91,7 @@ router.post("/create", (req, res) => {
     fileBook = path;
     fileName = filename;
   }
-  const newBook = new Books(
-    title,
-    description,
-    authors,
-    null,
-    null,
-    fileName,
-    fileBook
-  );
+  const newBook = new Books(title, description, authors, null, null, fileName, fileBook);
 
   books.push(newBook);
   res.redirect("/books/");
