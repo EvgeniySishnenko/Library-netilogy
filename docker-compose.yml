@@ -3,14 +3,14 @@ services:
     image: redis
     volumes:
       - ./data:/data
-  library_node:
+  library:
     build: .
     ports:
       - 80:8000
     environment:
       - PORT=8000
-  counter_node:
-    build: .
+  counter:
+    build: ./counter
     ports:
       - 81:9080
     environment:

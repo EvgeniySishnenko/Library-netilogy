@@ -4,6 +4,13 @@ const { store, Books } = require("../store");
 
 const router = express.Router();
 
+const postOptions = {
+  host: "counter",
+  port: "9080",
+  path: "/",
+  method: "POST",
+};
+
 router.get("/create", (req, res) => {
   res.render("books/create", {
     title: "Создание книги",
@@ -11,33 +18,47 @@ router.get("/create", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
   const { books } = store;
   const { id } = req.params;
   const index = books.findIndex((book) => book.id === id);
   if (index !== -1) {
     http
-      .get(`http://counter_node:9080/counter/${id}/incr`, (res) => {
-        if (res.statusCode !== 200) {
-          console.log(res.statusCode);
-          return;
-        }
-
-        res.setEncoding("utf8");
-        let rowDate = "";
-        res.on("data", (chunk) => (rowDate += chunk));
-        res.on("end", () => {
-          const parseData = JSON.parse(rowDate);
-          console.log(parseData);
-        });
+      .request({
+        host: "counter",
+        port: "9080",
+        path: `/counter/${id}/incr`,
+        method: "POST",
       })
       .on("error", (err) => {
         console.error(err);
-      });
+      })
+      .end();
+
+    const resultGet = await new Promise((resolve) => {
+      http
+        .get(`http://counter:9080/counter/${id}`, (res) => {
+          if (res.statusCode !== 200) {
+            console.log(res.statusCode);
+            return;
+          }
+
+          res.setEncoding("utf8");
+          let rowDate = "";
+          res.on("data", (chunk) => (rowDate += chunk));
+          res.on("end", () => {
+            resolve(JSON.parse(rowDate));
+          });
+        })
+        .on("error", (err) => {
+          console.error(err);
+        });
+    }).then((data) => data);
 
     res.render("books/view", {
       title: "Просмотр книги",
       book: books[index],
+      bookViews: resultGet.incr || 0,
     });
   } else {
     res.redirect("/404");

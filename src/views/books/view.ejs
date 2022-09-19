@@ -1,5 +1,4 @@
-<%- include('../port/layout-start', {title: title}) %> <%-
-include('../port/menu') %>
+<%- include('../port/layout-start', {title: title}) %> <%- include('../port/menu') %>
 
 <div class="container">
   <h1><%= title %></h1>
@@ -11,19 +10,12 @@ include('../port/menu') %>
           <img src="/<%= book.fileBook %>" alt="" />
           <h5 class="card-title"><%= book.title %></h5>
           <p class="card-text"><%= book.desc %></p>
-
+          <p class="card-text"><%= bookViews %></p>
           <div class="text-right">
-            <a
-              class="btn btn-sm btn-primary"
-              href="/book/update/<%= book.id %>"
-            >
+            <a class="btn btn-sm btn-primary" href="/book/update/<%= book.id %>">
               <i class="fa fa-pencil" aria-hidden="true"></i>
             </a>
-            <form
-              action="/book/delete/<%= book.id %>"
-              method="POST"
-              class="d-inline"
-            >
+            <form action="/book/delete/<%= book.id %>" method="POST" class="d-inline">
               <button class="btn btn-sm btn-danger">
                 <i class="fa fa-trash" aria-hidden="true"></i>
               </button>
