@@ -1,18 +1,20 @@
 services:
   redis:
     image: redis
+    volumes:
+      - ./data:/data
   library_node:
     build: .
     ports:
       - 80:8000
     environment:
       - PORT=8000
-      - REDIS_URL=redis://redis
-    depends_on:
-      - redis
   counter_node:
     build: .
     ports:
-      - 81:8080
+      - 81:9080
     environment:
-      - PORT=8080
+      - PORT=9080
+      - REDIS_URL=redis://redis
+    depends_on:
+      - redis

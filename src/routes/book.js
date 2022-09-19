@@ -4,25 +4,6 @@ const { store, Books } = require("../store");
 
 const router = express.Router();
 
-const url = `http://localhost:8080/`;
-
-const options = {
-  host: "http://localhost:8080/",
-  path: "/",
-  port: "8080",
-  method: "GET",
-};
-const callback = function (response) {
-  const str = "";
-  response.on("data", function (chunk) {
-    str += chunk;
-  });
-
-  response.on("end", function () {
-    return str;
-  });
-};
-
 router.get("/create", (req, res) => {
   res.render("books/create", {
     title: "Создание книги",
@@ -35,20 +16,28 @@ router.get("/:id", (req, res) => {
   const { id } = req.params;
   const index = books.findIndex((book) => book.id === id);
   if (index !== -1) {
-    options.path = `/counter/${id}/incr`;
-    const reqCounterGet = http.request(options, callback);
+    http
+      .get(`http://counter_node:9080/counter/${id}/incr`, (res) => {
+        if (res.statusCode !== 200) {
+          console.log(res.statusCode);
+          return;
+        }
 
-    options.path = `/counter/${id}`;
-    options.method = "POST";
-    const reqCounterPost = http.request(options, callback);
-
-    console.log(reqCounterGet);
-    console.log(reqCounterPost);
+        res.setEncoding("utf8");
+        let rowDate = "";
+        res.on("data", (chunk) => (rowDate += chunk));
+        res.on("end", () => {
+          const parseData = JSON.parse(rowDate);
+          console.log(parseData);
+        });
+      })
+      .on("error", (err) => {
+        console.error(err);
+      });
 
     res.render("books/view", {
       title: "Просмотр книги",
       book: books[index],
-      // numberViews: reqCounterGet,
     });
   } else {
     res.redirect("/404");
