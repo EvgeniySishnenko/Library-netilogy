@@ -1,20 +1,41 @@
+version: "3.7"
+
 services:
-  redis:
-    image: redis
-    volumes:
-      - ./data:/data
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+    depends_on:
+      - mongo
   library:
     build: .
     ports:
       - 80:8000
     environment:
       - PORT=8000
+    depends_on:
+      - mongo
+      - mongo-express
   counter:
     build: ./counter
     ports:
       - 81:9080
     environment:
       - PORT=9080
-      - REDIS_URL=redis://redis
     depends_on:
-      - redis
+      - mongo
+      - mongo-express
