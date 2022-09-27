@@ -16,9 +16,10 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views/"));
 
 app.use("/public/img", express.static(path.join(__dirname, "public/img")));
+
+app.use("/", homeRouter);
 app.use("/api", booksRouter);
 app.use("/api", authRouter);
-app.use("/", homeRouter);
 
 app.use(errorMiddleware);
 
