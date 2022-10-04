@@ -1,11 +1,10 @@
-<%- include('../port/layout-start', {title: title}) %> <%-
-include('../port/menu') %>
+<%- include('../port/layout-start', {title: title}) %> <%- include('../port/menu') %>
 
 <div class="container">
   <h1><%= title %></h1>
 
   <div class="row">
-    <div class="col-sm-6"><%- include('form') %></div>
+    <div class="col-sm-6"><%- include('form', { method: "POST", action: "/api/books"}) %></div>
   </div>
 </div>
 

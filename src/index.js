@@ -5,9 +5,10 @@ const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const { start } = require("./config/");
-const booksRouter = require("./routes/books");
+const apiBooksRouter = require("./routes/apiBooks");
 const authRouter = require("./routes/auth");
 const homeRouter = require("./routes/home");
+const booksRouter = require("./routes/books");
 const errorMiddleware = require("./middleware/error");
 const fileMulter = require("./middleware/file");
 const User = require("./models/user");
@@ -48,16 +49,22 @@ app.use(fileMulter.single("fileBook"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views/"));
 app.use(express.urlencoded({ extended: true }));
-app.use("/public/img", express.static(path.join(__dirname, "public/img")));
+app.use("/src/public/img", express.static(path.join(__dirname, "src/public/img")));
 
-app.use(session({ secret: "SECRET" }));
+app.use(
+  session({
+    secret: "cookie_secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/", homeRouter);
 app.use("/api", authRouter);
-app.use("/api", booksRouter);
-
+app.use("/api", apiBooksRouter);
+app.use("/", booksRouter);
 app.use(errorMiddleware);
 
 const PORT = start.PORT;
