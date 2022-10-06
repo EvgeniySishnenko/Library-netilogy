@@ -4,6 +4,8 @@ const path = require("path");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const socketIO = require("socket.io");
+const http = require("http");
 const { start } = require("./config/");
 const apiBooksRouter = require("./routes/apiBooks");
 const authRouter = require("./routes/auth");
@@ -12,6 +14,10 @@ const booksRouter = require("./routes/books");
 const errorMiddleware = require("./middleware/error");
 const fileMulter = require("./middleware/file");
 const User = require("./models/user");
+const app = express();
+
+const server = http.Server(app);
+const io = socketIO(server);
 
 const verify = async (email, password, done) => {
   try {
@@ -42,7 +48,6 @@ passport.deserializeUser(async (id, cb) => {
     cb(error);
   }
 });
-const app = express();
 
 app.use(fileMulter.single("fileBook"));
 
@@ -67,13 +72,28 @@ app.use("/api", apiBooksRouter);
 app.use("/", booksRouter);
 app.use(errorMiddleware);
 
+io.on("connection", (socket) => {
+  const { id } = socket;
+
+  /** Сообщение на странице книги */
+  const { roomName } = socket.handshake.query;
+  socket.join(roomName);
+  socket.on("comment-book", (comment) => {
+    socket.to(roomName).emit("comment-book", comment);
+    socket.emit("comment-book", comment);
+  });
+  socket.on("disconnect", () => {
+    console.log(`Socket disconnected: ${id}`);
+  });
+});
+
 const PORT = start.PORT;
 
 async function bootstrap() {
   try {
     await mongoose.connect("mongodb://root:example@mongo:27017/");
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log("Server is running on port " + PORT);
     });
   } catch (error) {

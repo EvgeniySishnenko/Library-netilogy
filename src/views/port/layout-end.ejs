@@ -1,4 +1,46 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    
+	<script>
+    const roomName = location.pathname.split('/').pop();
+    const socket = io.connect(`/`, {query: `roomName=${roomName}`});
+    
+    const boxList       = document.querySelector('#list');
+    const inputUsername = document.querySelector('#username');
+    const inputText     = document.querySelector('#text');
+    const send       = document.querySelector('#send');
+  
+
+    const getTmp = (comment) => {
+        return `
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <small>${comment.username}</small>
+                    </div>
+                    <p class="mb-1">${comment.text}</p>
+                </div>
+        `;
+    };
+
+
+    socket.on('comment-book',(comment)=> {
+        console.log('comment-book');
+        const div = getTmp(comment)
+        boxList.insertAdjacentHTML('beforeend', div)
+    })
+
+    send.addEventListener("click", ()=> {
+        
+        socket.emit('comment-book', {
+            username: inputUsername.value,
+            text: inputText.value,
+        })
+    })
+
+    
+
+    
+</script>
+
 </body>
 </html>
